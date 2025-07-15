@@ -8,46 +8,42 @@ import android.widget.Toast
 import com.example.studentmanager.model.ApiService
 import com.example.studentmanager.model.Student
 import com.example.studentmanager.databinding.ActivityMain2Binding
+import com.example.studentmanager.model.MainRepository
+import com.example.studentmanager.util.KEY
+import com.example.studentmanager.util.asyncRequest
+import com.example.studentmanager.util.showToast
 import com.google.gson.JsonObject
+import io.reactivex.rxjava3.core.CompletableObserver
+import io.reactivex.rxjava3.disposables.CompositeDisposable
+import io.reactivex.rxjava3.disposables.Disposable
 import retrofit2.*
 import retrofit2.converter.gson.GsonConverterFactory
 
-class MainActivity2 : AppCompatActivity() {
+class AddStudentActivity : AppCompatActivity() {
 
-    private lateinit var binding:ActivityMain2Binding
-    lateinit var apiService: ApiService
+    private lateinit var binding: ActivityMain2Binding
+    private lateinit var addStudentViewModel: AddStudentViewModel
+    private val compositeDisposable = CompositeDisposable()
     var isInserting = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMain2Binding.inflate(layoutInflater)
         setContentView(binding.root)
-
+        addStudentViewModel = AddStudentViewModel(MainRepository())
         supportActionBar?.setHomeButtonEnabled(true)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         binding.edtFirstName.requestFocus()
 
-        val retrofit = Retrofit.Builder()
-            .baseUrl(BASE_URL)
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-
-        apiService = retrofit.create(ApiService::class.java)
 
         val testMode = intent.getParcelableExtra<Student>(KEY)
         isInserting = (testMode == null)
 
         if (!isInserting) {
-            binding.btnDone.text = "update"
-            val dataFromIntent = testMode!!
-            binding.edtCourse.setText(dataFromIntent.course.toString())
-            binding.edtScore.setText(dataFromIntent.score.toString())
-
-            val spilitedName = dataFromIntent.name.split(" ")
-            binding.edtFirstName.setText(spilitedName[0])
-            binding.edtLastName.setText(spilitedName.last())
+            logicUpdateStudent()
         }
-        binding.btnDone.setOnClickListener{
+
+        binding.btnDone.setOnClickListener {
             if (isInserting) {
                 addNewStudent()
             } else {
@@ -55,6 +51,10 @@ class MainActivity2 : AppCompatActivity() {
             }
         }
 
+    }
+    override fun onDestroy() {
+        super.onDestroy()
+        compositeDisposable.clear()
     }
 
     private fun addNewStudent() {
@@ -68,32 +68,31 @@ class MainActivity2 : AppCompatActivity() {
             course.isNotEmpty() &&
             score.isNotEmpty()
         ) {
-            val jsonObject = JsonObject().apply {
-                addProperty("name", "$firstName $lastName")
-                addProperty("course", course)
-                addProperty("score", score.toInt())
-            }
 
-            apiService.insertStudent(jsonObject).enqueue(object : Callback<List<String>> {
-                override fun onResponse(call: Call<List<String>>, response: Response<List<String>>) {
-                    if (response.isSuccessful) {
-                        Toast.makeText(this@MainActivity2, "Insert finished :)", Toast.LENGTH_SHORT).show()
-                        onBackPressed()
-                    } else {
-                        Toast.makeText(this@MainActivity2, "Insert failed", Toast.LENGTH_SHORT).show()
+            addStudentViewModel.insertNewStudent(
+                Student(firstName + " " + lastName, course, score.toInt())
+            )
+                .asyncRequest()
+                .subscribe(object : CompletableObserver {
+                    override fun onSubscribe(d: Disposable) {
+                        compositeDisposable.add(d)
                     }
-                }
 
-                override fun onFailure(call: Call<List<String>>, t: Throwable) {
-                    Log.v("testError", t.message ?: "Unknown error")
-                    Toast.makeText(this@MainActivity2, "Error: ${t.message}", Toast.LENGTH_SHORT).show()
-                }
-            })
+                    override fun onComplete() {
+                        showToast("Insert finished :)")
+                        onBackPressed()
+                    }
+
+                    override fun onError(e: Throwable) {
+                        showToast("ERROR -> ${e.message ?: "null "}")
+                    }
+
+                })
+
         } else {
-            Toast.makeText(this, "Please enter complete information", Toast.LENGTH_LONG).show()
+            showToast("Please enter complete information!!!")
         }
     }
-
     private fun updateStudent() {
         val firstName = binding.edtFirstName.text.toString()
         val lastName = binding.edtLastName.text.toString()
@@ -105,31 +104,41 @@ class MainActivity2 : AppCompatActivity() {
             course.isNotEmpty() &&
             score.isNotEmpty()
         ) {
-            val jsonObject = JsonObject().apply {
-                addProperty("name", "$firstName $lastName")
-                addProperty("course", course)
-                addProperty("score", score.toInt())
-            }
 
-            apiService.updateStudent("$firstName $lastName", jsonObject).enqueue(object :
-                Callback<List<String>> {
-                override fun onResponse(call: Call<List<String>>, response: Response<List<String>>) {
-                    if (response.isSuccessful) {
-                        Toast.makeText(this@MainActivity2, "Student updated successfully", Toast.LENGTH_SHORT).show()
-                        onBackPressed()
-                    } else {
-                        Toast.makeText(this@MainActivity2, "Update failed", Toast.LENGTH_SHORT).show()
+            addStudentViewModel.updateNewStudent(
+                Student(firstName + " " + lastName , course , score.toInt())
+            )
+                .asyncRequest()
+                .subscribe(object  : CompletableObserver {
+                    override fun onSubscribe(d: Disposable) {
+                        compositeDisposable.add(d)
                     }
-                }
 
-                override fun onFailure(call: Call<List<String>>, t: Throwable) {
-                    Log.v("testError", t.message ?: "Unknown error")
-                    Toast.makeText(this@MainActivity2, "Error: ${t.message}", Toast.LENGTH_SHORT).show()
-                }
-            })
+                    override fun onComplete() {
+                        showToast("student information updated:)")
+                        onBackPressed()
+                    }
+
+                    override fun onError(e: Throwable) {
+                        showToast("ERROR -> ${e.message ?: "null"}")
+                    }
+
+                })
+
         } else {
-            Toast.makeText(this, "Please enter complete information", Toast.LENGTH_LONG).show()
+            showToast("Please enter complete information")
         }
+    }
+    private fun logicUpdateStudent() {
+        binding.btnDone.text = "update"
+        val dataFromIntent = intent.getParcelableExtra<Student>(KEY)
+
+        binding.edtCourse.setText(dataFromIntent?.course ?: "")
+        binding.edtScore.setText(dataFromIntent?.score?.toString() ?: "")
+
+        val splittedName = dataFromIntent?.name?.split(" ")
+        binding.edtFirstName.setText(splittedName?.getOrNull(0) ?: "")
+        binding.edtLastName.setText(splittedName?.getOrNull(1) ?: "")
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

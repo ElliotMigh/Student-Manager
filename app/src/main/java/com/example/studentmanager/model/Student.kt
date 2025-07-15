@@ -1,4 +1,4 @@
-package com.example.studentmanager
+package com.example.studentmanager.model
 
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize

@@ -1,6 +1,5 @@
-package com.example.studentmanager
+package com.example.studentmanager.model
 
-import android.telecom.Call
 import com.google.gson.JsonObject
 import io.reactivex.rxjava3.core.Single
 import retrofit2.http.*
@@ -11,16 +10,16 @@ interface ApiService {
     fun getAllStudent(): Single<List<Student>>
 
     @POST("/student")
-    fun insertStudent(@Body body: JsonObject): retrofit2.Call<List<String>>
+    fun insertStudent(@Body body: JsonObject): Single<List<String>>
 
     @PUT("/student/updating{name}")
     fun updateStudent(
         @Path("name") name: String,
         @Body body: JsonObject
-    ): retrofit2.Call<List<String>>
+    ): Single<List<String>>
 
     @DELETE("/student/deleting{name}")
-    fun deleteStudent(@Path("name") name:String) : retrofit2.Call<String>
+    fun deleteStudent(@Path("name") name:String) : Single<String>
 
 
 
