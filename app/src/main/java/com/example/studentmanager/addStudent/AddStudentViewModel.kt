@@ -1,7 +1,7 @@
 package com.example.studentmanager.addStudent
 
 import com.example.studentmanager.model.MainRepository
-import com.example.studentmanager.model.Student
+import com.example.studentmanager.model.local.student.Student
 import io.reactivex.rxjava3.core.Completable
 
 class AddStudentViewModel(private val mainRepository: MainRepository) {

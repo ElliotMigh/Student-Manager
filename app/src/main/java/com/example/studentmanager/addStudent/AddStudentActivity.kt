@@ -2,22 +2,16 @@ package com.example.studentmanager.addStudent
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.view.MenuItem
-import android.widget.Toast
-import com.example.studentmanager.model.ApiService
-import com.example.studentmanager.model.Student
+import com.example.studentmanager.model.local.student.Student
 import com.example.studentmanager.databinding.ActivityMain2Binding
 import com.example.studentmanager.model.MainRepository
 import com.example.studentmanager.util.KEY
 import com.example.studentmanager.util.asyncRequest
 import com.example.studentmanager.util.showToast
-import com.google.gson.JsonObject
 import io.reactivex.rxjava3.core.CompletableObserver
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.disposables.Disposable
-import retrofit2.*
-import retrofit2.converter.gson.GsonConverterFactory
 
 class AddStudentActivity : AppCompatActivity() {
 

@@ -1,6 +1,6 @@
 package com.example.studentmanager.util
 
-import com.example.studentmanager.model.Student
+import com.example.studentmanager.model.local.student.Student
 import com.google.gson.JsonObject
 
 fun studentToJsonObject(student: Student): JsonObject {

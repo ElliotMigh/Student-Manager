@@ -4,7 +4,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.example.studentmanager.model.Student
+import com.example.studentmanager.model.local.student.Student
 import com.example.studentmanager.databinding.RecyclerItemBinding
 
 class StudentAdapter(private val data: ArrayList<Student>, val studentEvent: StudentEvent) :

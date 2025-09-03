@@ -10,7 +10,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.studentmanager.addStudent.AddStudentActivity
 import com.example.studentmanager.databinding.ActivityMainBinding
 import com.example.studentmanager.model.MainRepository
-import com.example.studentmanager.model.Student
+import com.example.studentmanager.model.local.student.Student
 import com.example.studentmanager.util.KEY
 import com.example.studentmanager.util.asyncRequest
 import com.example.studentmanager.util.showToast
