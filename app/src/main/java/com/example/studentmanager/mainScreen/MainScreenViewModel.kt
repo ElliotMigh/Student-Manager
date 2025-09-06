@@ -36,20 +36,6 @@ class MainScreenViewModel(private val mainRepository: MainRepository) : ViewMode
             })
     }
 
-//    val progressBarSubject = BehaviorSubject.create<Boolean>()
-//
-//    fun getAllStudent(): Single<List<Student>> {
-//
-//        progressBarSubject.onNext(true)
-//
-//        return mainRepository
-//            .getAllStudent()
-//            .doFinally {
-//                progressBarSubject.onNext(false)
-//            }
-//
-//    }
-
     fun getAllData() : LiveData<List<Student>> {
         return mainRepository.getAllStudent()
     }
