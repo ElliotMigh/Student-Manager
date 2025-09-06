@@ -1,5 +1,6 @@
 package com.example.studentmanager.mainScreen
 
+import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -55,6 +56,13 @@ class StudentAdapter(private val data: ArrayList<Student>, val studentEvent: Stu
     fun updateItem(student: Student, position: Int) {
         data.set(position, student)
         notifyItemChanged(position)
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    fun refreshData(newData: List<Student>) {
+        data.clear()
+        data.addAll(newData)
+        notifyDataSetChanged()
     }
 
     interface StudentEvent {

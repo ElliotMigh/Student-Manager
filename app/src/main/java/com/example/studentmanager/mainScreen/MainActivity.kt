@@ -3,17 +3,18 @@ package com.example.studentmanager.mainScreen
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AlertDialog
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.studentmanager.addStudent.AddStudentActivity
 import com.example.studentmanager.databinding.ActivityMainBinding
 import com.example.studentmanager.model.MainRepository
+import com.example.studentmanager.model.local.MyDatabase
 import com.example.studentmanager.model.local.student.Student
-import com.example.studentmanager.util.KEY
-import com.example.studentmanager.util.asyncRequest
-import com.example.studentmanager.util.showToast
+import com.example.studentmanager.util.*
 import io.reactivex.rxjava3.core.CompletableObserver
 import io.reactivex.rxjava3.core.SingleObserver
 import io.reactivex.rxjava3.disposables.CompositeDisposable
@@ -33,44 +34,37 @@ class MainActivity : AppCompatActivity(), StudentAdapter.StudentEvent {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         setSupportActionBar(binding.toolbarMain)
-        mainScreenViewModel = MainScreenViewModel(MainRepository())
         compositeDisposable = CompositeDisposable()
 
+        //initial recyclerview:
+        initRecycler()
+
+        mainScreenViewModel = ViewModelProvider(
+            this,
+            MainViewModelFactory(
+                MainRepository(
+                    ApiServiceSingleton.apiService!!,
+                    MyDatabase.getDatabase(applicationContext).studentDao
+                )
+            )
+        ).get(MainScreenViewModel::class.java)
 
         binding.btnAddStudent.setOnClickListener {
             val intent = Intent(this, AddStudentActivity::class.java)
             startActivity(intent)
         }
 
-        compositeDisposable.add(
-            mainScreenViewModel.progressBarSubject.subscribe {
-                if (it) {
-                    binding.progressMain.visibility = View.VISIBLE
-                } else {
-                    binding.progressMain.visibility = View.INVISIBLE
-                }
-            }
-        )
+        mainScreenViewModel.getAllData().observe(this) {
+            refreshRecyclerData(it)
+        }
+
+        mainScreenViewModel.getErrorData().observe(this) {
+         Log.e("testLog",it)
+        }
     }
 
-    override fun onResume() {
-        super.onResume()
-        mainScreenViewModel.getAllStudent()
-            .asyncRequest()
-            .subscribe(object : SingleObserver<List<Student>> {
-                override fun onSubscribe(d: Disposable) {
-                    compositeDisposable.add(d)
-                }
-
-                override fun onSuccess(t: List<Student>) {
-                    setDataToRecycler(t)
-                }
-
-                override fun onError(e: Throwable) {
-                    showToast("ERROR -> ${e.message ?: "null"}")
-                }
-
-            })
+    private fun refreshRecyclerData(newData: List<Student>) {
+        myAdapter.refreshData(newData)
     }
 
     override fun onDestroy() {
@@ -101,9 +95,8 @@ class MainActivity : AppCompatActivity(), StudentAdapter.StudentEvent {
         dialog.show()
     }
 
-
-    private fun setDataToRecycler(data: List<Student>) {
-        val myData = ArrayList(data)
+    private fun initRecycler() {
+        val myData = arrayListOf<Student>()
         myAdapter = StudentAdapter(myData, this)
         binding.recyclerMain.adapter = myAdapter
         binding.recyclerMain.layoutManager = LinearLayoutManager(this, RecyclerView.VERTICAL, false)
@@ -127,9 +120,6 @@ class MainActivity : AppCompatActivity(), StudentAdapter.StudentEvent {
                 }
 
             })
-
-        myAdapter.removeItem(student, position)
-
     }
 
 }
