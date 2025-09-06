@@ -3,12 +3,13 @@ package com.example.studentmanager.addStudent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.MenuItem
+import androidx.lifecycle.ViewModelProvider
 import com.example.studentmanager.model.local.student.Student
 import com.example.studentmanager.databinding.ActivityMain2Binding
+import com.example.studentmanager.mainScreen.MainScreenViewModel
 import com.example.studentmanager.model.MainRepository
-import com.example.studentmanager.util.KEY
-import com.example.studentmanager.util.asyncRequest
-import com.example.studentmanager.util.showToast
+import com.example.studentmanager.model.local.MyDatabase
+import com.example.studentmanager.util.*
 import io.reactivex.rxjava3.core.CompletableObserver
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.disposables.Disposable
@@ -24,7 +25,17 @@ class AddStudentActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMain2Binding.inflate(layoutInflater)
         setContentView(binding.root)
-        addStudentViewModel = AddStudentViewModel(MainRepository())
+
+        addStudentViewModel = ViewModelProvider(
+            this,
+            AddStudentViewModelFactory(
+                MainRepository(
+                    ApiServiceSingleton.apiService!!,
+                    MyDatabase.getDatabase(applicationContext).studentDao
+                )
+            )
+        ).get(AddStudentViewModel::class.java)
+
         supportActionBar?.setHomeButtonEnabled(true)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         binding.edtFirstName.requestFocus()

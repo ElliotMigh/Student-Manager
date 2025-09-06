@@ -63,10 +63,6 @@ class MainActivity : AppCompatActivity(), StudentAdapter.StudentEvent {
         }
     }
 
-    private fun refreshRecyclerData(newData: List<Student>) {
-        myAdapter.refreshData(newData)
-    }
-
     override fun onDestroy() {
         super.onDestroy()
         compositeDisposable.clear()
@@ -93,6 +89,10 @@ class MainActivity : AppCompatActivity(), StudentAdapter.StudentEvent {
 
         val dialog = builder.create()
         dialog.show()
+    }
+
+    private fun refreshRecyclerData(newData: List<Student>) {
+        myAdapter.refreshData(newData)
     }
 
     private fun initRecycler() {
