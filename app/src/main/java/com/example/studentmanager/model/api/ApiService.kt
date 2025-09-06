@@ -20,6 +20,4 @@ interface ApiService {
     @DELETE("/student/deleting{name}")
     fun deleteStudent( @Path("name") name:String ) :Completable
 
-
-
 }

@@ -1,4 +1,4 @@
-package com.example.studentmanager.model.local
+package com.example.studentmanager.model.local.student
 
 import androidx.lifecycle.LiveData
 import androidx.room.Dao

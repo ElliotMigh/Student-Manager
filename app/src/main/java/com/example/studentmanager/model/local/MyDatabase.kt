@@ -5,6 +5,7 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.example.studentmanager.model.local.student.Student
+import com.example.studentmanager.model.local.student.StudentDao
 
 @Database(entities = [Student::class], version = 1, exportSchema = false)
 abstract class MyDatabase : RoomDatabase() {
